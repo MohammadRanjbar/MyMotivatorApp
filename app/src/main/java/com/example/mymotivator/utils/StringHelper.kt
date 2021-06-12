@@ -1,6 +1,4 @@
-package com.example.mymotivator.ui.utils
-
-import android.util.Log
+package com.example.mymotivator.utils
 
 fun SeperateStrings(rawSentences:String): List<Pair<String, String>> {
 // split sentence by "/" an create new array

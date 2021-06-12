@@ -1,4 +1,4 @@
-package com.example.mymotivator.ui.mainFragment
+package com.example.mymotivator.ui.mainFragment.mainFragmentRecyclerAdapters
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -7,7 +7,7 @@ import com.bumptech.glide.Glide
 import com.example.mymotivator.R
 import com.example.mymotivator.databinding.RecyclerCustomItemsBinding
 
-class SettingRecyclerAdapter:RecyclerView.Adapter<SettingRecyclerAdapter.ViewHolder>() {
+class SettingRecyclerAdapter(private var listener:SettingsClickedListener):RecyclerView.Adapter<SettingRecyclerAdapter.ViewHolder>() {
     private val items = listOf("font" to R.drawable.font_icon,
     "color" to R.drawable.color_icon,"size" to R.drawable.resize_icon)
 
@@ -23,8 +23,18 @@ class SettingRecyclerAdapter:RecyclerView.Adapter<SettingRecyclerAdapter.ViewHol
         holder.bind(item)
     }
 
-    class  ViewHolder(private var binding: RecyclerCustomItemsBinding):RecyclerView.ViewHolder(binding.root){
+    inner class  ViewHolder(private var binding: RecyclerCustomItemsBinding):RecyclerView.ViewHolder(binding.root){
 
+
+        init {
+            binding.root.setOnClickListener {
+                val position = adapterPosition
+                if(position != RecyclerView.NO_POSITION){
+                    val item = items[position]
+                    listener.onSettingsItemClicked(item.first)
+                }
+            }
+        }
         fun bind(item: Pair<String, Int>){
             binding.apply {
                 itemTxt.text = item.first
@@ -36,4 +46,8 @@ class SettingRecyclerAdapter:RecyclerView.Adapter<SettingRecyclerAdapter.ViewHol
 
     }
     override fun getItemCount()= items.size
+
+    interface SettingsClickedListener{
+        fun onSettingsItemClicked(item:String)
+    }
 }

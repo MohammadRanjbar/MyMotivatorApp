@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- selected item bg -->
+    <item android:drawable="@drawable/font_item_selected_bg" android:state_pressed="false" android:state_selected="true"/>
+    <!-- standard  item bg -->
+ <item android:drawable="@drawable/motivation_sentence_bg" android:state_selected="false"/>
+</selector>
