@@ -1,10 +1,17 @@
 package com.example.mymotivator.ui.mainFragment
 
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -18,7 +25,10 @@ import com.example.mymotivator.databinding.MainFragmentBinding
 import com.example.mymotivator.ui.mainFragment.mainFragmentRecyclerAdapters.ColorRecyclerAdapter
 import com.example.mymotivator.ui.mainFragment.mainFragmentRecyclerAdapters.FontRecyclerAdapter
 import com.example.mymotivator.ui.mainFragment.mainFragmentRecyclerAdapters.SettingRecyclerAdapter
+import com.example.mymotivator.utils.CheckConnectionLiveData
+import com.example.mymotivator.utils.LoadState
 import com.example.mymotivator.utils.SeperateStrings
+import com.example.mymotivator.utils.exhaustive
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -33,6 +43,7 @@ class MainFragment : Fragment(R.layout.main_fragment),
     ColorRecyclerAdapter.ColorRecyclerItemClickListener {
     private val viewModel: MainFragmentViewModel by viewModels()
     private lateinit var binding: MainFragmentBinding
+    private lateinit var alertDialog: AlertDialog
 
     // this variable is as key to check which setting component visible if its open make it in visible
     // 0 = nothing is visible
@@ -46,9 +57,40 @@ class MainFragment : Fragment(R.layout.main_fragment),
         super.onViewCreated(view, savedInstanceState)
         binding = MainFragmentBinding.bind(view)
 
+         setUpShowConnectionAndLoadingAnimation()
+        //check internet connection and request  random image
+        CheckConnectionLiveData(requireContext()).observe(viewLifecycleOwner) {
+            if (it) {
+                binding.noConnection.visibility = View.INVISIBLE
+                viewModel.getRandomImg()
+            } else {
+                binding.noConnection.visibility = View.VISIBLE
+            }
 
-        //get first random pic
-        viewModel.getRandomImg()
+        }
+
+        viewModel.LoadingStateLiveData.observe(viewLifecycleOwner) { loadState->
+
+            when (loadState) {
+                LoadState.LOADED -> {
+                    binding.noConnection.visibility = View.INVISIBLE
+                    alertDialog.dismiss()
+
+                }
+                LoadState.LOADING -> {
+                    alertDialog.show()
+                }
+                LoadState.ERROR -> {
+                  alertDialog.dismiss()
+                    Log.i("MyMotivator", "onViewCreated: Error ")
+
+
+                }
+                else->{}
+
+            }.exhaustive
+
+        }
 
         //prepare list of sentences
         val rawSentences = resources.getString(R.string.sentences)
@@ -68,6 +110,10 @@ class MainFragment : Fragment(R.layout.main_fragment),
                             target: Target<Drawable>?,
                             isFirstResource: Boolean
                         ): Boolean {
+                            Log.i("MyMotivator", "onViewCreated: Glide Error ")
+
+                            viewModel.LoadingStateLiveData.postValue(LoadState.ERROR)
+
                             return false
                         }
 
@@ -82,6 +128,7 @@ class MainFragment : Fragment(R.layout.main_fragment),
                             sentenceTxt.text = listOfSentenceAndAuthor[randomIndex].first
                             authorTxt.text = listOfSentenceAndAuthor[randomIndex].second
                             txtContainer.visibility = View.VISIBLE
+                            viewModel.LoadingStateLiveData.postValue(LoadState.LOADED)
 
                             return false
                         }
@@ -172,7 +219,7 @@ class MainFragment : Fragment(R.layout.main_fragment),
             increaseSizeBtn.setOnClickListener {
                 var txtSize = sizeTxt.text.toString().toFloat()
                 if (txtSize <= 24) {
-                      var size = ++txtSize
+                    var size = ++txtSize
                     sizeTxt.text = size.toInt().toString()
                     sentenceTxt.textSize = ++size
 
@@ -309,5 +356,21 @@ class MainFragment : Fragment(R.layout.main_fragment),
             sentenceTxt.setTextColor(ContextCompat.getColor(requireContext(), item))
             authorTxt.setTextColor(ContextCompat.getColor(requireContext(), item))
         }
+    }
+    private fun setUpShowConnectionAndLoadingAnimation() {
+
+        val builder: AlertDialog.Builder = AlertDialog.Builder(requireContext())
+        val viewGroup: ViewGroup = activity?.findViewById(android.R.id.content) as ViewGroup
+        val dialogView: View =
+            LayoutInflater.from(requireContext())
+                .inflate(R.layout.loading_dialog_layout, viewGroup, false)
+
+
+        dialogView.setBackgroundColor(Color.TRANSPARENT)
+        builder.setView(dialogView)
+        alertDialog = builder.create()
+        alertDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+
     }
 }

@@ -13,6 +13,8 @@ buildscript {
         hiltAndroidXVersion = "1.0.0-alpha03"
         fragmentVersion = "1.3.0-beta01"
         coroutinesVersion = "1.4.1"
+        lottieVersion ="3.7.0"
+
 
 
 

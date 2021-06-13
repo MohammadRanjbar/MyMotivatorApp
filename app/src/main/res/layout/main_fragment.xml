@@ -26,8 +26,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/about_bg" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <LinearLayout
             android:id="@+id/txt_container"
@@ -179,8 +178,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/upload_img"
-        app:layout_constraintVertical_bias="1.0"
-         />
+        app:layout_constraintVertical_bias="1.0" />
+
     <RelativeLayout
         android:id="@+id/size_panel"
         android:layout_width="match_parent"
@@ -194,41 +193,37 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/upload_img"
-        app:layout_constraintVertical_bias="1.0"
-        >
+        app:layout_constraintVertical_bias="1.0">
 
         <ImageView
             android:id="@+id/decrease_size_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/arrow_left"
             android:layout_centerVertical="true"
             android:layout_toStartOf="@id/size_txt"
             android:background="@drawable/btns_bg"
-           />
+            android:src="@drawable/arrow_left" />
 
         <TextView
             android:id="@+id/size_txt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="12"
-            android:textColor="@color/black"
-            android:textSize="14sp"
-            android:padding="4dp"
-            android:background="@drawable/btns_bg"
             android:layout_centerInParent="true"
             android:layout_margin="10dp"
-            />
+            android:background="@drawable/btns_bg"
+            android:padding="4dp"
+            android:text="12"
+            android:textColor="@color/black"
+            android:textSize="14sp" />
 
         <ImageView
             android:id="@+id/increase_size_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/arrow_right"
             android:layout_centerVertical="true"
-            android:background="@drawable/btns_bg"
             android:layout_toEndOf="@id/size_txt"
-            />
+            android:background="@drawable/btns_bg"
+            android:src="@drawable/arrow_right" />
     </RelativeLayout>
 
     <LinearLayout
@@ -253,19 +248,53 @@
             android:layout_height="match_parent"
             android:background="@drawable/close_btn_bg"
             android:padding="24dp"
-            android:src="@drawable/close_w"
-            />
+            android:src="@drawable/close_w" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/setting_rec"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center"
+            android:layout_marginStart="40dp"
             android:padding="5dp"
             android:paddingStart="10dp"
-            tools:listitem="@layout/recycler_custom_items"
             tools:ignore="RtlSymmetry"
-            android:layout_marginStart="40dp"
-            />
+            tools:listitem="@layout/recycler_custom_items" />
     </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/no_connection"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/white"
+        android:elevation="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="invisible">
+
+
+            <com.airbnb.lottie.LottieAnimationView
+                android:id="@+id/no_connection_lotti"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                app:lottie_autoPlay="true"
+                android:layout_centerInParent="true"
+                app:lottie_rawRes="@raw/no_connection"
+                android:elevation="5dp"
+                app:lottie_loop="true" />
+
+
+        <TextView
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/no_connection_lotti"
+            android:layout_centerInParent="true"
+            android:textColor="@color/color_eight"
+            android:gravity="center"
+            android:text="@string/no_connection_message"
+            />
+
+    </RelativeLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

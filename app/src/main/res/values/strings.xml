@@ -299,4 +299,5 @@
                                 "“Stay strong, stay positive, and never give up.”":"Roy Bennett"/
                                 "“Be positive. Be true. Be kind.”":"Roy Bennett"
     </string>
+    <string name="no_connection_message">Please Check Your Internet Connection Or Use Vpn</string>
 </resources>

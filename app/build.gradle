@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId "com.example.mymotivator"
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
@@ -78,6 +78,9 @@ dependencies {
 
     //dexter
     implementation "com.karumi:dexter:$dexterVersion"
+
+    //lottie
+    implementation "com.airbnb.android:lottie:$lottieVersion"
 
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
