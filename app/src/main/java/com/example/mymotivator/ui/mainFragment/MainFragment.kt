@@ -3,6 +3,7 @@ package com.example.mymotivator.ui.mainFragment
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.View
+import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -14,6 +15,7 @@ import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.example.mymotivator.R
 import com.example.mymotivator.databinding.MainFragmentBinding
+import com.example.mymotivator.ui.mainFragment.mainFragmentRecyclerAdapters.ColorRecyclerAdapter
 import com.example.mymotivator.ui.mainFragment.mainFragmentRecyclerAdapters.FontRecyclerAdapter
 import com.example.mymotivator.ui.mainFragment.mainFragmentRecyclerAdapters.SettingRecyclerAdapter
 import com.example.mymotivator.utils.SeperateStrings
@@ -25,7 +27,10 @@ import kotlinx.coroutines.launch
 import kotlin.random.Random
 
 @AndroidEntryPoint
-class MainFragment : Fragment(R.layout.main_fragment), SettingRecyclerAdapter.SettingsClickedListener,FontRecyclerAdapter.FontRecyclerItemClickedListener{
+class MainFragment : Fragment(R.layout.main_fragment),
+    SettingRecyclerAdapter.SettingsClickedListener,
+    FontRecyclerAdapter.FontRecyclerItemClickedListener,
+    ColorRecyclerAdapter.ColorRecyclerItemClickListener {
     private val viewModel: MainFragmentViewModel by viewModels()
     private lateinit var binding: MainFragmentBinding
 
@@ -34,7 +39,8 @@ class MainFragment : Fragment(R.layout.main_fragment), SettingRecyclerAdapter.Se
     // 1 = font is visible
     // 2 = color
     // 3 = size
-    private companion object var isSettingComponentOpen = 0
+
+    private var isSettingComponentOpen = 0
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -46,7 +52,7 @@ class MainFragment : Fragment(R.layout.main_fragment), SettingRecyclerAdapter.Se
 
         //prepare list of sentences
         val rawSentences = resources.getString(R.string.sentences)
-        val listOfSentenceAndAuther = SeperateStrings(rawSentences)
+        val listOfSentenceAndAuthor = SeperateStrings(rawSentences)
 
 
         //observe and change image if new random image requested
@@ -72,9 +78,9 @@ class MainFragment : Fragment(R.layout.main_fragment), SettingRecyclerAdapter.Se
                             dataSource: DataSource?,
                             isFirstResource: Boolean
                         ): Boolean {
-                            val randomIndex = Random.nextInt(0, listOfSentenceAndAuther.size)
-                            sentenceTxt.text = listOfSentenceAndAuther[randomIndex].first
-                            authorTxt.text = listOfSentenceAndAuther[randomIndex].second
+                            val randomIndex = Random.nextInt(0, listOfSentenceAndAuthor.size)
+                            sentenceTxt.text = listOfSentenceAndAuthor[randomIndex].first
+                            authorTxt.text = listOfSentenceAndAuthor[randomIndex].second
                             txtContainer.visibility = View.VISIBLE
 
                             return false
@@ -88,10 +94,16 @@ class MainFragment : Fragment(R.layout.main_fragment), SettingRecyclerAdapter.Se
         // prepare  setting recycler layout manager and init  its adapter
         val layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         val settingRecyclerAdapter = SettingRecyclerAdapter(this)
-        // prepare font recycler layout manager and init  its adapter
 
+
+        // prepare font recycler layout manager and init  its adapter
         val fontLayoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-        val fontRecyclerAdapter = FontRecyclerAdapter(requireContext(),this)
+        val fontRecyclerAdapter = FontRecyclerAdapter(requireContext(), this)
+
+        // prepare color recycler layout manager and init  its adapter
+        val colorLayoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        val colorRecyclerAdapter = ColorRecyclerAdapter(requireContext(), this)
+
         binding.apply {
 
             //get new image and sentence when referesh imgebtn was clicked
@@ -128,6 +140,10 @@ class MainFragment : Fragment(R.layout.main_fragment), SettingRecyclerAdapter.Se
             fontRecycler.layoutManager = fontLayoutManager
             fontRecycler.adapter = fontRecyclerAdapter
 
+            // init color recycler view
+            colorRecycler.layoutManager = colorLayoutManager
+            colorRecycler.adapter = colorRecyclerAdapter
+
 
             setting.setOnClickListener {
                 settingPanel.visibility = View.VISIBLE
@@ -142,6 +158,32 @@ class MainFragment : Fragment(R.layout.main_fragment), SettingRecyclerAdapter.Se
                         fontRecycler.visibility = View.INVISIBLE
                         isSettingComponentOpen = 0
                     }
+                    2 -> {
+                        colorRecycler.visibility = View.INVISIBLE
+                        isSettingComponentOpen = 0
+                    }
+                    3 -> {
+                        sizePanel.visibility = View.INVISIBLE
+                        isSettingComponentOpen = 0
+                    }
+                }
+            }
+
+            increaseSizeBtn.setOnClickListener {
+                var txtSize = sizeTxt.text.toString().toFloat()
+                if (txtSize <= 24) {
+                      var size = ++txtSize
+                    sizeTxt.text = size.toInt().toString()
+                    sentenceTxt.textSize = ++size
+
+                }
+            }
+            decreaseSizeBtn.setOnClickListener {
+                var txtSize = sizeTxt.text.toString().toFloat()
+                if (txtSize >= 8) {
+                    var size = --txtSize
+                    sizeTxt.text = size.toInt().toString()
+                    sentenceTxt.textSize = --size
                 }
             }
         }
@@ -149,65 +191,123 @@ class MainFragment : Fragment(R.layout.main_fragment), SettingRecyclerAdapter.Se
 
     }
 
+    //implementing setting recycler view click listener
     override fun onSettingsItemClicked(item: String) {
         when (item) {
             "font" -> {
-                binding.fontRecycler.visibility = View.VISIBLE
+                binding.apply {
+                    colorRecycler.visibility = View.INVISIBLE
+                    sizePanel.visibility = View.INVISIBLE
+                    fontRecycler.visibility = View.VISIBLE
+
+                }
                 isSettingComponentOpen = 1
             }
             "color" -> {
+                binding.apply {
+                    fontRecycler.visibility = View.INVISIBLE
+                    sizePanel.visibility = View.INVISIBLE
+                    colorRecycler.visibility = View.VISIBLE
+                }
+                isSettingComponentOpen = 2
             }
             "size" -> {
+                binding.apply {
+                    fontRecycler.visibility = View.INVISIBLE
+                    colorRecycler.visibility = View.INVISIBLE
+                    sizePanel.visibility = View.VISIBLE
+
+                }
+                isSettingComponentOpen = 3
             }
         }
     }
 
+
+    //implementing font recycler view click listener
     override fun onFontRecyclerItemClicked(font: String) {
         binding.apply {
             when (font) {
                 "Stint Ultra" -> {
-                   sentenceTxt.typeface = ResourcesCompat.getFont(requireContext(),R.font.stint_ultra_condensed_regular)
-                    authorTxt.typeface = ResourcesCompat.getFont(requireContext(),R.font.stint_ultra_condensed_regular)
+                    sentenceTxt.typeface = ResourcesCompat.getFont(
+                        requireContext(),
+                        R.font.stint_ultra_condensed_regular
+                    )
+                    authorTxt.typeface = ResourcesCompat.getFont(
+                        requireContext(),
+                        R.font.stint_ultra_condensed_regular
+                    )
                 }
                 "Abril Fat face" -> {
-                    sentenceTxt.typeface = ResourcesCompat.getFont(requireContext(),R.font.abril_fatface_regular)
-                    authorTxt.typeface = ResourcesCompat.getFont(requireContext(),R.font.abril_fatface_regular)
+                    sentenceTxt.typeface =
+                        ResourcesCompat.getFont(requireContext(), R.font.abril_fatface_regular)
+                    authorTxt.typeface =
+                        ResourcesCompat.getFont(requireContext(), R.font.abril_fatface_regular)
 
                 }
                 "Dancing Script" -> {
-                    sentenceTxt.typeface = ResourcesCompat.getFont(requireContext(),R.font.dancingscript_variable_font_wght)
-                    authorTxt.typeface = ResourcesCompat.getFont(requireContext(),R.font.dancingscript_variable_font_wght)
+                    sentenceTxt.typeface = ResourcesCompat.getFont(
+                        requireContext(),
+                        R.font.dancingscript_variable_font_wght
+                    )
+                    authorTxt.typeface = ResourcesCompat.getFont(
+                        requireContext(),
+                        R.font.dancingscript_variable_font_wght
+                    )
                 }
                 "Hammer Smith" -> {
-                    sentenceTxt.typeface = ResourcesCompat.getFont(requireContext(),R.font.hammersmith_one_regular)
-                    authorTxt.typeface = ResourcesCompat.getFont(requireContext(),R.font.hammersmith_one_regular)
+                    sentenceTxt.typeface =
+                        ResourcesCompat.getFont(requireContext(), R.font.hammersmith_one_regular)
+                    authorTxt.typeface =
+                        ResourcesCompat.getFont(requireContext(), R.font.hammersmith_one_regular)
                 }
                 "Indie flower" -> {
-                    sentenceTxt.typeface = ResourcesCompat.getFont(requireContext(),R.font.indie_flower_regular)
-                    authorTxt.typeface = ResourcesCompat.getFont(requireContext(),R.font.indie_flower_regular)
+                    sentenceTxt.typeface =
+                        ResourcesCompat.getFont(requireContext(), R.font.indie_flower_regular)
+                    authorTxt.typeface =
+                        ResourcesCompat.getFont(requireContext(), R.font.indie_flower_regular)
                 }
                 "Lobster" -> {
-                    sentenceTxt.typeface = ResourcesCompat.getFont(requireContext(),R.font.lobster_regular)
-                    authorTxt.typeface = ResourcesCompat.getFont(requireContext(),R.font.lobster_regular)
+                    sentenceTxt.typeface =
+                        ResourcesCompat.getFont(requireContext(), R.font.lobster_regular)
+                    authorTxt.typeface =
+                        ResourcesCompat.getFont(requireContext(), R.font.lobster_regular)
                 }
                 "Odibee sans" -> {
-                    sentenceTxt.typeface = ResourcesCompat.getFont(requireContext(),R.font.odibee_sans_regular)
-                    authorTxt.typeface = ResourcesCompat.getFont(requireContext(),R.font.odibee_sans_regular)
+                    sentenceTxt.typeface =
+                        ResourcesCompat.getFont(requireContext(), R.font.odibee_sans_regular)
+                    authorTxt.typeface =
+                        ResourcesCompat.getFont(requireContext(), R.font.odibee_sans_regular)
                 }
                 "Pacifico" -> {
-                    sentenceTxt.typeface = ResourcesCompat.getFont(requireContext(),R.font.pacifico_regular)
-                    authorTxt.typeface = ResourcesCompat.getFont(requireContext(),R.font.pacifico_regular)
+                    sentenceTxt.typeface =
+                        ResourcesCompat.getFont(requireContext(), R.font.pacifico_regular)
+                    authorTxt.typeface =
+                        ResourcesCompat.getFont(requireContext(), R.font.pacifico_regular)
                 }
                 "Shadows Into Lights" -> {
-                    sentenceTxt.typeface = ResourcesCompat.getFont(requireContext(),R.font.shadows_into_light_regular)
-                    authorTxt.typeface = ResourcesCompat.getFont(requireContext(),R.font.stint_ultra_condensed_regular)
+                    sentenceTxt.typeface =
+                        ResourcesCompat.getFont(requireContext(), R.font.shadows_into_light_regular)
+                    authorTxt.typeface = ResourcesCompat.getFont(
+                        requireContext(),
+                        R.font.stint_ultra_condensed_regular
+                    )
                 }
                 "Viaoda Libre" -> {
-                    sentenceTxt.typeface = ResourcesCompat.getFont(requireContext(),R.font.viaoda_libre_regular)
-                    authorTxt.typeface = ResourcesCompat.getFont(requireContext(),R.font.viaoda_libre_regular)
+                    sentenceTxt.typeface =
+                        ResourcesCompat.getFont(requireContext(), R.font.viaoda_libre_regular)
+                    authorTxt.typeface =
+                        ResourcesCompat.getFont(requireContext(), R.font.viaoda_libre_regular)
                 }
 
             }
+        }
+    }
+
+    override fun onColorItemClicked(item: Int) {
+        binding.apply {
+            sentenceTxt.setTextColor(ContextCompat.getColor(requireContext(), item))
+            authorTxt.setTextColor(ContextCompat.getColor(requireContext(), item))
         }
     }
 }

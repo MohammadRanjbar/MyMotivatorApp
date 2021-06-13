@@ -8,4 +8,14 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="text_card_view_bg">#7EFFFFFF</color>
+    <color name="color_one">#760FAE</color>
+    <color name="color_two">#82F4EB</color>
+    <color name="color_three">#223A11</color>
+    <color name="color_fore">#AF397B</color>
+    <color name="color_five">#0B41AF</color>
+    <color name="color_six">#9A4934</color>
+    <color name="color_seven">#C6A157</color>
+    <color name="color_eight">#7754D6</color>
+
+
 </resources>

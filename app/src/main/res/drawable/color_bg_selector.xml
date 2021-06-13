@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- selected time bg-->
+    <item android:drawable="@drawable/color_selected_bg" android:state_selected="true" android:state_pressed="false"/>
+
+    <!-- standard time -->
+
+    <item android:drawable="@drawable/motivation_sentence_bg" android:state_selected="false"/>
+
+</selector>
