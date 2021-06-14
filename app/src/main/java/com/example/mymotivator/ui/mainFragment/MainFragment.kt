@@ -1,17 +1,21 @@
 package com.example.mymotivator.ui.mainFragment
 
+import android.Manifest
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
-import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -25,10 +29,13 @@ import com.example.mymotivator.databinding.MainFragmentBinding
 import com.example.mymotivator.ui.mainFragment.mainFragmentRecyclerAdapters.ColorRecyclerAdapter
 import com.example.mymotivator.ui.mainFragment.mainFragmentRecyclerAdapters.FontRecyclerAdapter
 import com.example.mymotivator.ui.mainFragment.mainFragmentRecyclerAdapters.SettingRecyclerAdapter
-import com.example.mymotivator.utils.CheckConnectionLiveData
-import com.example.mymotivator.utils.LoadState
-import com.example.mymotivator.utils.SeperateStrings
-import com.example.mymotivator.utils.exhaustive
+import com.example.mymotivator.utils.*
+import com.karumi.dexter.Dexter
+import com.karumi.dexter.PermissionToken
+import com.karumi.dexter.listener.PermissionDeniedResponse
+import com.karumi.dexter.listener.PermissionGrantedResponse
+import com.karumi.dexter.listener.PermissionRequest
+import com.karumi.dexter.listener.single.PermissionListener
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -44,6 +51,7 @@ class MainFragment : Fragment(R.layout.main_fragment),
     private val viewModel: MainFragmentViewModel by viewModels()
     private lateinit var binding: MainFragmentBinding
     private lateinit var alertDialog: AlertDialog
+    private lateinit var galleryAlertDialog: AlertDialog
 
     // this variable is as key to check which setting component visible if its open make it in visible
     // 0 = nothing is visible
@@ -233,6 +241,78 @@ class MainFragment : Fragment(R.layout.main_fragment),
                     sentenceTxt.textSize = --size
                 }
             }
+            save.setOnClickListener {
+
+               saveImageToGallery(R.id.save)
+            }
+            uploadImg.setOnClickListener {
+                showResultDialog(viewModel.saveOrShareImage(R.id.upload_img,requireActivity()))
+            }
+        }
+
+
+    }
+
+    private fun saveImageToGallery(id: Int) {
+
+        Dexter.withContext(requireContext())
+            .withPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE).withListener(object :
+                PermissionListener {
+                override fun onPermissionGranted(p0: PermissionGrantedResponse?) {
+                  val result =  viewModel.saveOrShareImage(id,requireActivity())
+                    showResultDialog(result)
+                }
+
+                override fun onPermissionDenied(response: PermissionDeniedResponse?) {
+                    if (response?.isPermanentlyDenied!!) {
+                        activity?.startActivity(Intent(Settings.ACTION_SETTINGS))
+                    }
+                }
+
+                override fun onPermissionRationaleShouldBeShown(
+                    p0: PermissionRequest?,
+                    token: PermissionToken?
+                ) {
+                    token?.continuePermissionRequest()
+                }
+
+            }).check()
+
+    }
+
+    private fun showResultDialog(result: ResponseOfStorage) {
+        val builder: AlertDialog.Builder = AlertDialog.Builder(requireContext())
+        val viewGroup: ViewGroup = activity?.findViewById(android.R.id.content) as ViewGroup
+        val dialogView: View =
+            LayoutInflater.from(requireContext())
+                .inflate(R.layout.result_dialog_layout, viewGroup, false)
+        val dialogtxt = dialogView.findViewById<TextView>(R.id.dialog_txt)
+
+        when(result){
+            ResponseOfStorage.savedInGalley ->{
+                    dialogtxt.text ="Image Saved SuccessFully"
+            }
+            ResponseOfStorage.sendToInstagram -> {}
+            ResponseOfStorage.instagramNotInstall ->{
+                dialogtxt.text ="Instagram Not Installed!"
+
+            }
+            ResponseOfStorage.errorOccured -> {
+                    dialogtxt.text ="Image Not Saved!"
+
+            }
+        }.exhaustive
+
+        val okBtn = dialogView.findViewById<Button>(R.id.dialog_btn)
+
+        dialogView.setBackgroundColor(Color.TRANSPARENT)
+        builder.setView(dialogView)
+        galleryAlertDialog = builder.create()
+        galleryAlertDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        galleryAlertDialog.show()
+
+        okBtn.setOnClickListener {
+            galleryAlertDialog.dismiss()
         }
 
 
@@ -369,6 +449,7 @@ class MainFragment : Fragment(R.layout.main_fragment),
         dialogView.setBackgroundColor(Color.TRANSPARENT)
         builder.setView(dialogView)
         alertDialog = builder.create()
+        alertDialog.setCancelable(false)
         alertDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
 

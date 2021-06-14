@@ -1,5 +1,6 @@
 package com.example.mymotivator.ui.mainFragment
 
+import android.app.Activity
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -8,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.mymotivator.network.RandomPicModel
 import com.example.mymotivator.network.UnsplashApi
 import com.example.mymotivator.utils.LoadState
+import com.example.mymotivator.utils.StorageAndShareHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -16,7 +18,7 @@ import javax.inject.Inject
 @HiltViewModel
 class MainFragmentViewModel @Inject
 constructor(
-    private val unsplashApi: UnsplashApi
+    private val unsplashApi: UnsplashApi,
 ):ViewModel() {
 
     private val _ImageResponseLiveData = MutableLiveData<RandomPicModel>()
@@ -40,4 +42,7 @@ constructor(
     }
 
     val ImageResponseLiveData:LiveData<RandomPicModel> = _ImageResponseLiveData
+
+    fun saveOrShareImage(id:Int,activity:Activity)=StorageAndShareHelper(activity).saveOrShareImage(id)
+
 }
