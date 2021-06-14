@@ -8,33 +8,23 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.net.Uri
-import android.os.Build
-import android.os.Environment
 import android.provider.MediaStore
-import android.util.Log
 import android.view.View
-import androidx.annotation.RequiresApi
 import com.example.mymotivator.R
-import dagger.hilt.android.qualifiers.ApplicationContext
-
-import java.io.File
-import java.io.FileOutputStream
-import java.io.OutputStream
 
 
-class StorageAndShareHelper  constructor(  context: Activity) {
+
+class StorageAndShareHelper  constructor( context: Activity) {
 
 
     private val activity = context
 
-    var app_installed = false
 
 
     fun saveOrShareImage(id: Int): ResponseOfStorage {
 
 
         var savedImagePath: String?
-        var imageFileName = "JPEG_" + System.currentTimeMillis() + ".jpg"
 
         val bitmap = getBitMap(R.id.image_container)
 
@@ -122,17 +112,6 @@ class StorageAndShareHelper  constructor(  context: Activity) {
 
     }
 
-    private fun galleryAddPic(savedImagePath: String?): ResponseOfStorage {
-        savedImagePath?.let { path ->
-            val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
-            val f = File(path)
-            val contentUri: Uri = Uri.fromFile(f)
-            mediaScanIntent.data = contentUri
-            activity.sendBroadcast(mediaScanIntent)
-            return ResponseOfStorage.savedInGalley
-        }
-        return ResponseOfStorage.errorOccured
-    }
 
     private fun shareToInstagram(savedImagePath: String): ResponseOfStorage {
 
