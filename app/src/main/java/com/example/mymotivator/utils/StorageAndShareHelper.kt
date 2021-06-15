@@ -8,10 +8,15 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.net.Uri
+import android.os.Build
+import android.os.Environment
 import android.provider.MediaStore
 import android.view.View
+import androidx.annotation.RequiresApi
 import com.example.mymotivator.R
-
+import java.io.File
+import java.io.FileOutputStream
+import java.io.OutputStream
 
 
 class StorageAndShareHelper  constructor( context: Activity) {
@@ -21,36 +26,73 @@ class StorageAndShareHelper  constructor( context: Activity) {
 
 
 
-    fun saveOrShareImage(id: Int): ResponseOfStorage {
+    fun saveOrShareImage(id: Int):ResponseOfStorage {
 
 
         var savedImagePath: String?
+        var imageFileName = "JPEG_" + System.currentTimeMillis() + ".jpg"
 
-        val bitmap = getBitMap(R.id.image_container)
+      val bitmap = getBitMap()
+
+        if (android.os.Build.VERSION.SDK_INT >= 29) {
+            //Log.i(Config.APP_LOG_TAG, "saveImage: insert image to gallery ")
+
+            savedImagePath = insertImageIntoExternalFile(
+                activity.contentResolver!!,
+                bitmap,
+                "MyMotivatePhotos ${System.currentTimeMillis()}",
+                "nothing"
+            )
+
+            if (savedImagePath!=null) {
+                if (id == R.id.save) {
+                    return ResponseOfStorage.savedInGalley
+                } else if (id == R.id.upload_img) {
+                    return shareToInstagram(savedImagePath)
+
+                }
+            }else
+                return ResponseOfStorage.errorOccured
+            //Log.i(Config.APP_LOG_TAG, "saveImage: $savedImagePath ")
 
 
-        savedImagePath = insertImageIntoExternalFile(
-            activity.contentResolver!!,
-            bitmap,
-            "MyMotivatePhotos ${System.currentTimeMillis()}",
-            "nothing"
-        )
+        }
+        var storgeDir =
+            File(
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+                    .toString() + "/MyMotivator"
+            )
 
-        if (savedImagePath != null) {
-            if (id == R.id.save) {
-                return ResponseOfStorage.savedInGalley
-            } else if (id == R.id.upload_img) {
-                return shareToInstagram(savedImagePath)
 
+        var success = true
+        if (!storgeDir.exists()) {
+            success = storgeDir.mkdir()
+        }
+
+        if (success) {
+            val imageFile = File(storgeDir, imageFileName)
+            savedImagePath = imageFile.absolutePath
+            try {
+                val fout: OutputStream = FileOutputStream(imageFile)
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fout)
+                fout.close()
+
+            } catch (e: Exception) {
+                return ResponseOfStorage.errorOccured
             }
-        } else
-            return ResponseOfStorage.errorOccured
-        //  Log.i(Config.APP_LOG_TAG, "saveImage: $savedImagePath ")
+
+            if (id == R.id.save) {
+                return   galleryAddPic(savedImagePath)
+            } else if (id == R.id.upload_img) {
+                return  shareToInstagram(savedImagePath)
+            }
+
+        }
 
         return ResponseOfStorage.errorOccured
     }
 
-
+    @RequiresApi(Build.VERSION_CODES.Q)
     private fun insertImageIntoExternalFile(
         cr: ContentResolver,
         source: Bitmap?,
@@ -63,7 +105,7 @@ class StorageAndShareHelper  constructor( context: Activity) {
         values.put(MediaStore.Images.Media.DESCRIPTION, description)
         values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
         values.put(MediaStore.Images.Media.DATE_ADDED, System.currentTimeMillis())
-        // values.put(MediaStore.Images.Media.DATE_TAKEN, System.currentTimeMillis())
+         values.put(MediaStore.Images.Media.DATE_TAKEN, System.currentTimeMillis())
         var url: Uri? = null
         var stringUrl: String? = null
         try {
@@ -89,15 +131,28 @@ class StorageAndShareHelper  constructor( context: Activity) {
 
         }
         if (url != null) {
-            stringUrl = url.toString();
+            stringUrl = url.toString()
         }
         return stringUrl
 
     }
 
-    private fun getBitMap(shareImgContainer: Int): Bitmap {
-        val view = activity.findViewById<View>(shareImgContainer)
-        val returnBitmap = Bitmap.createBitmap(1080, 1920, Bitmap.Config.ARGB_8888)
+
+    private fun galleryAddPic(savedImagePath: String?): ResponseOfStorage {
+        savedImagePath?.let { path ->
+            val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
+            val f = File(path)
+            val contentUri: Uri = Uri.fromFile(f)
+            mediaScanIntent.data = contentUri
+            activity.sendBroadcast(mediaScanIntent)
+            return ResponseOfStorage.savedInGalley
+        }
+        return ResponseOfStorage.errorOccured
+    }
+
+    private fun getBitMap(): Bitmap {
+        val view = activity.findViewById<View>(R.id.image_container)
+        val returnBitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(returnBitmap)
 
         val drawable = view.background

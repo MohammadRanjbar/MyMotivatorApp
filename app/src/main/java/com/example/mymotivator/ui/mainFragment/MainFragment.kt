@@ -65,7 +65,7 @@ class MainFragment : Fragment(R.layout.main_fragment),
         super.onViewCreated(view, savedInstanceState)
         binding = MainFragmentBinding.bind(view)
 
-         setUpShowConnectionAndLoadingAnimation()
+        setUpShowConnectionAndLoadingAnimation()
         //check internet connection and request  random image
         CheckConnectionLiveData(requireContext()).observe(viewLifecycleOwner) {
             if (it) {
@@ -77,7 +77,7 @@ class MainFragment : Fragment(R.layout.main_fragment),
 
         }
 
-        viewModel.LoadingStateLiveData.observe(viewLifecycleOwner) { loadState->
+        viewModel.LoadingStateLiveData.observe(viewLifecycleOwner) { loadState ->
 
             when (loadState) {
                 LoadState.LOADED -> {
@@ -89,12 +89,12 @@ class MainFragment : Fragment(R.layout.main_fragment),
                     alertDialog.show()
                 }
                 LoadState.ERROR -> {
-                  alertDialog.dismiss()
+                    alertDialog.dismiss()
                     Log.i("MyMotivator", "onViewCreated: Error ")
 
 
                 }
-                else->{}
+
 
             }.exhaustive
 
@@ -243,10 +243,14 @@ class MainFragment : Fragment(R.layout.main_fragment),
             }
             save.setOnClickListener {
 
-               saveImageToGallery(R.id.save)
+                saveImageToGallery(R.id.save)
             }
             uploadImg.setOnClickListener {
-                showResultDialog(viewModel.saveOrShareImage(R.id.upload_img,requireActivity()))
+                val result=viewModel.saveOrShareImage(R.id.upload_img, requireActivity())
+                if (result!= ResponseOfStorage.sendToInstagram
+                ) {
+                    showResultDialog(result)
+                }
             }
         }
 
@@ -259,7 +263,7 @@ class MainFragment : Fragment(R.layout.main_fragment),
             .withPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE).withListener(object :
                 PermissionListener {
                 override fun onPermissionGranted(p0: PermissionGrantedResponse?) {
-                  val result =  viewModel.saveOrShareImage(id,requireActivity())
+                    val result = viewModel.saveOrShareImage(id, requireActivity())
                     showResultDialog(result)
                 }
 
@@ -288,17 +292,18 @@ class MainFragment : Fragment(R.layout.main_fragment),
                 .inflate(R.layout.result_dialog_layout, viewGroup, false)
         val dialogtxt = dialogView.findViewById<TextView>(R.id.dialog_txt)
 
-        when(result){
-            ResponseOfStorage.savedInGalley ->{
-                    dialogtxt.text ="Image Saved SuccessFully"
+        when (result) {
+            ResponseOfStorage.savedInGalley -> {
+                dialogtxt.text = "Image Saved SuccessFully"
             }
-            ResponseOfStorage.sendToInstagram -> {}
-            ResponseOfStorage.instagramNotInstall ->{
-                dialogtxt.text ="Instagram Not Installed!"
+            ResponseOfStorage.sendToInstagram -> {
+            }
+            ResponseOfStorage.instagramNotInstall -> {
+                dialogtxt.text = "Instagram Not Installed!"
 
             }
             ResponseOfStorage.errorOccured -> {
-                    dialogtxt.text ="Image Not Saved!"
+                dialogtxt.text = "Image Not Saved!"
 
             }
         }.exhaustive
@@ -437,6 +442,7 @@ class MainFragment : Fragment(R.layout.main_fragment),
             authorTxt.setTextColor(ContextCompat.getColor(requireContext(), item))
         }
     }
+
     private fun setUpShowConnectionAndLoadingAnimation() {
 
         val builder: AlertDialog.Builder = AlertDialog.Builder(requireContext())
