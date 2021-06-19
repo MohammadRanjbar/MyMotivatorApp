@@ -5,6 +5,6 @@
 
     <!-- standard time -->
 
-    <item android:drawable="@drawable/motivation_sentence_bg" android:state_selected="false"/>
+    <item android:drawable="@drawable/color_recycler_item_bg" android:state_selected="false"/>
 
 </selector>

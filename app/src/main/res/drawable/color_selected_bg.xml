@@ -7,8 +7,8 @@
 
             <solid android:color="@color/text_card_view_bg" />
             <stroke
-                android:width="2dp"
-                android:color="@android:color/black" />
+                android:width="3dp"
+                android:color="#800C0C" />
             <corners android:radius="20dp" />
 
 

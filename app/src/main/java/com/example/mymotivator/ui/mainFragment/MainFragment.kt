@@ -18,6 +18,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
@@ -30,6 +31,7 @@ import com.example.mymotivator.ui.mainFragment.mainFragmentRecyclerAdapters.Colo
 import com.example.mymotivator.ui.mainFragment.mainFragmentRecyclerAdapters.FontRecyclerAdapter
 import com.example.mymotivator.ui.mainFragment.mainFragmentRecyclerAdapters.SettingRecyclerAdapter
 import com.example.mymotivator.utils.*
+import com.google.android.material.snackbar.Snackbar
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionDeniedResponse
@@ -87,10 +89,12 @@ class MainFragment : Fragment(R.layout.main_fragment),
                 }
                 LoadState.LOADING -> {
                     alertDialog.show()
+                   binding.txtContainer.visibility = View.INVISIBLE
+
                 }
                 LoadState.ERROR -> {
                     alertDialog.dismiss()
-                    Log.i("MyMotivator", "onViewCreated: Error ")
+                    Snackbar.make(view,"there is an error! please try again",Snackbar.LENGTH_LONG).show()
 
 
                 }
@@ -243,7 +247,7 @@ class MainFragment : Fragment(R.layout.main_fragment),
             }
             save.setOnClickListener {
 
-                saveImageToGallery(R.id.save)
+                saveImageToGallery()
             }
             uploadImg.setOnClickListener {
                 val result=viewModel.saveOrShareImage(R.id.upload_img, requireActivity())
@@ -252,18 +256,24 @@ class MainFragment : Fragment(R.layout.main_fragment),
                     showResultDialog(result)
                 }
             }
+
+            //navigate to about fragment
+            menuImg.setOnClickListener {
+                val action = MainFragmentDirections.actionMainFragmentToAboutFragment()
+                findNavController().navigate(action)
+            }
         }
 
 
     }
 
-    private fun saveImageToGallery(id: Int) {
+    private fun saveImageToGallery() {
 
         Dexter.withContext(requireContext())
             .withPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE).withListener(object :
                 PermissionListener {
                 override fun onPermissionGranted(p0: PermissionGrantedResponse?) {
-                    val result = viewModel.saveOrShareImage(id, requireActivity())
+                    val result = viewModel.saveOrShareImage(R.id.save, requireActivity())
                     showResultDialog(result)
                 }
 
