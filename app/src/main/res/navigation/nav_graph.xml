@@ -19,5 +19,11 @@
         android:id="@+id/aboutFragment"
         android:name="com.example.mymotivator.ui.aboutFragment.AboutFragment"
         android:label="about_fragment_layout"
-        tools:layout="@layout/about_fragment_layout" />
+        tools:layout="@layout/about_fragment_layout" >
+        <action
+            android:id="@+id/action_aboutFragment_to_mainFragment"
+            app:destination="@id/mainFragment"
+            app:popUpTo="@id/mainFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
 </navigation>

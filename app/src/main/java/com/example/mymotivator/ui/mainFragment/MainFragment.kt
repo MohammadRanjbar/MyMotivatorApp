@@ -19,7 +19,9 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
@@ -151,7 +153,7 @@ class MainFragment : Fragment(R.layout.main_fragment),
 
 
         // prepare  setting recycler layout manager and init  its adapter
-        val layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        val layoutManager = GridLayoutManager(requireContext(),3)
         val settingRecyclerAdapter = SettingRecyclerAdapter(this)
 
 
@@ -205,13 +207,13 @@ class MainFragment : Fragment(R.layout.main_fragment),
 
 
             setting.setOnClickListener {
-                settingPanel.visibility = View.VISIBLE
+                motionLayout.transitionToEnd()
             }
 
             settingCloseBtn.setOnClickListener {
                 when (isSettingComponentOpen) {
                     0 -> {
-                        settingPanel.visibility = View.INVISIBLE
+                        motionLayout.transitionToStart()
                     }
                     1 -> {
                         fontRecycler.visibility = View.INVISIBLE
