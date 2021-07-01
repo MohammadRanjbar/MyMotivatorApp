@@ -1,3 +1,3 @@
 # MyMotivatorApp
 this app get random and motivator image from unsplash and add  sentence or proverb to it ,this image with sentence can be shared to instagram or save to gallery ,
-requirment : android 5 (API 21) +
+requirment : android 5 (API 21) +  and  for Iran locale  please use vpn to connect to unsplash
